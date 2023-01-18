@@ -2,6 +2,18 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 
+function generateRandomString (length) {
+  let result = "";
+  const character = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  const lengthOf = character.length;
+
+  for (let i = 0; i < length; i++) {
+    result += character.charAt(Math.floor(Math.random() * lengthOf));
+  }
+  return result;
+
+};
+
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 
@@ -36,24 +48,17 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
+  const shortUrl = req.params.id
+  const longURL = urlDatabase[shortUrl]
+  const templateVars = { id: shortUrl, longURL };
   res.render("urls_show", templateVars);
 });
 
 app.post("/urls", (req, res) => {
- console.log(req.body);
- res.send("Thank you for you're submission");
+  console.log(req.body);
+  const shortUrl = generateRandomString(6)
+  const longUrl = req.body.longURL
+  urlDatabase[shortUrl] = longUrl
+
+  res.redirect(`/urls/${shortUrl}`)
 });
-
-function generateRandomString (length) {
-  let result = "";
-  const character = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  const lengthOf = character.length;
-
-  for (let i = 0; i < length; i++) {
-    result += character.charAt(Math.floor(Math.random() * lengthOf));
-  }
-  return result;
-
-};
-console.log(generateRandomString(5))
