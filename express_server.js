@@ -81,4 +81,8 @@ app.post("/urls/:id", (req, res) => {
   res.redirect("/urls")
 });
 
-
+app.post("/login", (req, res) => { 
+const userName = req.body.username
+res.cookie("username", userName)
+res.redirect("/urls")
+});
