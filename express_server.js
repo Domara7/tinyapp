@@ -24,6 +24,8 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = {};
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -41,16 +43,20 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+  const userId = req.cookies["user_id"]
+  const userObject = users[userId]
   const templateVars = { 
     urls: urlDatabase, 
-    username: req.cookies["username"] 
+    user: userObject
   };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
+  const userId = req.cookies["user_id"]
+  const userObject = users[userId]
   const templateVars = {  
-    username: req.cookies["username"] 
+    user: userObject
   };
   res.render("urls_new", templateVars);
 });
@@ -91,13 +97,13 @@ app.post("/urls/:id", (req, res) => {
 
 app.post("/login", (req, res) => { 
   const userName = req.body.username
-  res.cookie("username", userName)
+  res.cookie("user_id", userName)
   res.redirect("/urls")
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("username")
-  res.redirect("/urls")
+  res.clearCookie("user_id")
+  res.redirect("/register")
 });
 
 app.get("/register", (req, res) => {
@@ -107,6 +113,14 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const email = req.body.email
   const password = req.body.password
-  res.send("Complete")
+  const userId = generateRandomString(6)
+
+  users[userId] = {
+    id: userId,
+    email,
+    password
+  }
+  res.cookie("user_id", userId);
+  res.redirect("/urls");
 });
 
