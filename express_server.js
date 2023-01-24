@@ -111,10 +111,23 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
+  
   const email = req.body.email
   const password = req.body.password
+  
+  if (email === ""|| password === "") {
+    res.send(400, "You will need to fill in the following password or username.")
+    return
+  }
+  for(const userId in users) {
+    const user = users[userId]
+    if (user.email === email){
+      res.send(400, "An account with this email is already registered.")
+    return
+    }
+  }
   const userId = generateRandomString(6)
-
+  
   users[userId] = {
     id: userId,
     email,
