@@ -2,6 +2,7 @@ const express = require("express");
 const cookieParser = require('cookie-parser')
 const app = express();
 const PORT = 8080; // default port 8080
+const users = {};
 
 function generateRandomString (length) {
   let result = "";
@@ -15,6 +16,15 @@ function generateRandomString (length) {
 
 };
 
+function getUserByEmail (email) {
+  for(const userId in users){
+    if (users[userId].email === email){
+      return users[userId];
+    }
+  }
+  return null
+};
+
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser())
@@ -24,7 +34,6 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-const users = {};
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -96,14 +105,25 @@ app.post("/urls/:id", (req, res) => {
 });
 
 app.post("/login", (req, res) => { 
-  const userName = req.body.username
-  res.cookie("user_id", userName)
-  res.redirect("/urls")
+  const email = req.body.email
+  const password = req.body.password
+  const user = getUserByEmail(email)
+  
+  if (!user){
+    return res.status(403).send({Message:"Email has not been registered"})
+  };
+
+  if (user.password !== password){
+    return res.status(403).send({Message:"Password does not match this email"})
+  };
+
+  res.cookie("user_id", user.id);
+  res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id")
-  res.redirect("/register")
+  res.redirect("/login")
 });
 
 app.get("/register", (req, res) => {
@@ -139,5 +159,4 @@ app.post("/register", (req, res) => {
 
 app.get("/login", (req, res) => {
   res.render("login")
-  res.redirect("urls")
 });
