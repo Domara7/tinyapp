@@ -47,7 +47,7 @@ app.get("/urls", (req, res) => {
   const userObject = users[userId]
   const templateVars = { 
     urls: urlDatabase, 
-    user: userObject
+    user: userId ? userObject : {}
   };
   res.render("urls_index", templateVars);
 });
@@ -137,3 +137,7 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 });
 
+app.get("/login", (req, res) => {
+  res.render("login")
+  res.redirect("urls")
+});
