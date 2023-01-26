@@ -99,8 +99,12 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/u/:id", (req, res) => {
-  const id = req.params.id
-  const longURL = urlDatabase[id]
+   const id = req.params.id
+   const longURL = urlDatabase[id]
+
+  if(!id) {
+    return res.send("<html>This Id is not in the data base</html>")
+  }
   res.redirect(longURL);
 });
 // delete short and long 
