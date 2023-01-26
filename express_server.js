@@ -25,15 +25,30 @@ function getUserByEmail (email) {
   return null
 };
 
+function urlsForUser(id) {
+  const result = {}
+  for (const shorturl in urlDatabase) {
+    if(urlDatabase[shorturl].userID === id){
+      result[shorturl] = urlDatabase[shorturl].longURL
+    }
+  }
+  return result;
+}
+
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser())
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
 };
-
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -77,8 +92,23 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
+  const userId = req.cookies["user_id"]
+  const usersUrls = urlsForUser(userId)
+  const id = req.params.id
+  if(!userId) {
+    return res.send("<html>User must be logged in to see the URLS</html>")
+  }
+
+  if(urlDatabase[id]) {
+    return res.send("<html>This shortUrl does not exist</html>")
+  }
+
+  if(!usersUrls[id]){
+    return res.send("<html>This URL does not belong to you</html>")
+  };
+
   const shortUrl = req.params.id
-  const longURL = urlDatabase[shortUrl]
+  const longURL = urlDatabase[shortUrl].longURL
   const templateVars = { id: shortUrl, longURL };
   res.render("urls_show", templateVars);
 });
@@ -93,7 +123,7 @@ app.post("/urls", (req, res) => {
   const longUrl = req.body.longURL
   const userObject = users[userId]
   console.log(userObject)
-  urlDatabase[shortUrl] = longUrl
+  urlDatabase[shortUrl] = {longURL: longUrl, userID: userId}
   
   return res.redirect(`/urls`)
 });
@@ -109,13 +139,41 @@ app.get("/u/:id", (req, res) => {
 });
 // delete short and long 
 app.post("/urls/:id/delete", (req, res) => {
+ 
+  const userId = req.cookies["user_id"]
+  const usersUrls = urlsForUser(userId)
   const id = req.params.id
-  delete urlDatabase[id]
+  if(!userId) {
+    return res.send("<html>User must be logged in to see the URLS</html>")
+  }
+
+  if(urlDatabase[id]) {
+    return res.send("<html>This shortUrl does not exist</html>")
+  }
+
+  if(!usersUrls[id]){
+    return res.send("<html>This URL does not belong to you</html>")
+  };
+  
   res.redirect("/urls")
 });
 
 app.post("/urls/:id", (req, res) => {
+  const userId = req.cookies["user_id"]
+  const usersUrls = urlsForUser(userId)
   const id = req.params.id
+  if(!userId) {
+    return res.send("<html>User must be logged in to see the URLS</html>")
+  }
+
+  if(urlDatabase[id]) {
+    return res.send("<html>This shortUrl does not exist</html>")
+  }
+
+  if(!usersUrls[id]){
+    return res.send("<html>This URL does not belong to you</html>")
+  };
+
   urlDatabase[id] = req.body.LongUrl
   res.redirect("/urls")
 });
