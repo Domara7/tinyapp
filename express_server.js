@@ -4,6 +4,11 @@ const app = express();
 const PORT = 8080; // default port 8080
 const users = {};
 
+app.set("view engine", "ejs");
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser())
+
+
 function generateRandomString (length) {
   let result = "";
   const character = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -35,9 +40,6 @@ function urlsForUser(id) {
   return result;
 }
 
-app.set("view engine", "ejs");
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser())
 
 const urlDatabase = {
   b6UTxQ: {
