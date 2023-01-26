@@ -17,22 +17,16 @@ const testUsers = {
 
 describe('getUserByEmail', function() {
   it('should return a user with valid email', function() {
-    const user = getUserByEmail("user@example.com", testUsers)
+    const user = getUserByEmail("user@example.com", testUsers);
     const expectedUser = testUsers["userRandomID"];
     assert.deepEqual(user, expectedUser );
   });
-});
-
-describe('getUserByEmail', function() {
+  
   it('should return undefined if we pass a email that is not in our users database', function() {
-    const user = getUserByEmail("user@example.com", testUsers)
-    const expectedUser = testUsers["userRandomID"];
-    assert.notDeepEqual("undefined", user, expectedUser)
-  });
-
-  it('should return undefined for a non-existent email', function() {
-    const user = getUserByEmail("user@example.com", testUsers)
-    const expectedUser = testUsers["userRandomID"];
-    assert.notDeepEqual("undefined", expectedUser)
+    const user = getUserByEmail("Non-existent@example.com", testUsers);
+    assert.isUndefined(user);
   });
 });
+
+
+  

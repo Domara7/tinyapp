@@ -9,7 +9,7 @@ function getUserByEmail (email, database) {
      }
    }
  
- return null
+ return undefined;
 };
 
 module.exports = getUserByEmail;
