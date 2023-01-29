@@ -12,6 +12,7 @@
   </head>
 
   <body>
+    <%- include('partials/_header')%>
     <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
@@ -22,7 +23,7 @@
       </div>
       <div class="card-footer text-muted"></div>
       <form method="POST" action="/urls/<%=id%>">
-        <input name="LongUrl" type="text">
+        <input name="LongUrl" type="text" />
         <button>Submit</button>
       </form>
     </div>

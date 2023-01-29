@@ -9,7 +9,6 @@ const {
 } = require("./helpers");
 
 const { urlDatabase, users } = require("./database");
-
 const PORT = 8080;
 
 app.set("view engine", "ejs");
@@ -25,7 +24,14 @@ app.use(
 );
 
 app.get("/", (req, res) => {
-  res.redirect("/urls");
+  const userId = req.session["user_id"];
+  const user = users[userId];
+
+  if (user) {
+    res.redirect("/urls");
+  }
+
+  res.redirect("/login");
 });
 
 app.get("/urls.json", (req, res) => {
@@ -66,7 +72,9 @@ app.get("/urls/:id", (req, res) => {
   const userId = req.session["user_id"];
   const usersUrls = urlsForUser(userId, urlDatabase);
   const shortUrl = req.params.id;
-
+  const longURL = urlDatabase[shortUrl].longURL;
+  const user = users[userId];
+  const templateVars = { id: shortUrl, longURL, user };
   if (!userId) {
     return res.send("<html>User must be logged in to see the URLS</html>");
   }
@@ -79,20 +87,21 @@ app.get("/urls/:id", (req, res) => {
     return res.send("<html>This URL does not belong to you</html>");
   }
 
-  const longURL = urlDatabase[shortUrl].longURL;
-  const templateVars = { id: shortUrl, longURL };
   res.render("urls_show", templateVars);
 });
 
 app.post("/urls", (req, res) => {
   const userID = req.session["user_id"];
+  const shortUrl = generateRandomString(6);
+  const longURL = req.body.longURL;
 
   if (!userID) {
     return res.send("<html>User must be logged in to shorten URLS</html>");
   }
 
-  const shortUrl = generateRandomString(6);
-  const longURL = req.body.longURL;
+  if (longURL.length === 0) {
+    return res.send("You must submit a proper URL");
+  }
 
   urlDatabase[shortUrl] = { longURL, userID };
 
@@ -100,22 +109,20 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/u/:id", (req, res) => {
+  const id = req.params.id;
+  const longURL = urlDatabase[id].longURL;
+
   if (!urlDatabase[id]) {
     return res.send("<html>This Id is not in the database</html>");
   }
 
-  const longURL = urlDatabase[id].longURL;
   res.redirect(longURL);
 });
 
 // delete short and long
 app.post("/urls/:id/delete", (req, res) => {
-  console.log("inside delete route");
   const userId = req.session["user_id"];
   const usersUrls = urlsForUser(userId, urlDatabase);
-
-  console.log("usersUrls", usersUrls);
-  console.log("userId", userId);
   const shortUrl = req.params.id;
 
   if (!userId) {
@@ -161,7 +168,10 @@ app.get("/login", (req, res) => {
   if (userObject) {
     return res.redirect("/urls");
   }
-  return res.render("login");
+  const templateVars = {
+    user: userObject,
+  };
+  return res.render("login", templateVars);
 });
 
 app.post("/login", (req, res) => {
@@ -190,7 +200,10 @@ app.get("/register", (req, res) => {
   if (userObject) {
     return res.redirect("/urls");
   }
-  return res.render("register");
+  const templateVars = {
+    user: userObject,
+  };
+  return res.render("register", templateVars);
 });
 
 app.post("/register", (req, res) => {
